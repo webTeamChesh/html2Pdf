@@ -1,0 +1,64 @@
+<html>
+<head>
+<!-- CDNs for the jspdf & html2canvas libraries. Place in the head! -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+<div id="content">
+<!-- Place these tags around the part of your document to be available to download. -->
+</div>
+
+<!-- The download button should be outside the content div. -->
+<div>
+<button id="downloadBtn" type="button" class="cec-button">Download page as .pdf.</button>
+</div>
+
+
+<script>
+    const { jsPDF } = window.jspdf; 
+    const dlBtn = document.getElementById("downloadBtn");
+    let content = document.getElementById("content");
+    dlBtn.addEventListener("click", downloadAsPdf);
+    
+    function downloadAsPdf() {
+        let pageName = document.getElementById("pageHeading").innerText.replace(/[^a-z0-9-]/gi, '');
+        let doc = new jsPDF('p', 'px', 'a4');
+        doc.setProperties({
+            title: pageName,
+            subject: 'JSNA',
+            keywords: 'Cheshire East',
+            });
+        doc.html(content, {
+            html2canvas: {
+               scale: 0.5,
+            },
+            callback: function (doc) {
+                addPageNums();
+             doc.save(pageName);
+            },
+            x: 10,
+            y: 10,
+            autoPaging: 'text',
+            windowWidth: 820,
+            width: 1,
+            margin: [10,0,40,10],
+        });
+        
+        function addPageNums() {
+            let count = doc.internal.getNumberOfPages();
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(8);
+            Array.from({length: count}, (_, i) => i + 1).forEach(j => {
+                doc.setPage(j);
+                doc.text(`Page ${String(j)} of ${String(count)}`, doc.internal.pageSize.width / 2, 620, {
+                  align: 'center'
+                });
+              });
+            }
+    }
+    </script>
+
+</body>
+</html>
